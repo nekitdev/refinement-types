@@ -24,7 +24,8 @@ pub mod type_regex;
 
 pub use core::{Error, Predicate, Refinement};
 pub use logic::{And, False, Imply, Nand, Nor, Not, Or, True, Xnor, Xor};
+pub use static_str::StaticStr;
 pub use type_str::TypeStr;
 
 #[cfg(feature = "regex")]
-pub use type_regex::TypeRegex;
+pub use type_regex::{StaticRegex, TypeRegex};
