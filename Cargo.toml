@@ -1,0 +1,40 @@
+[package]
+name = "refinement-types"
+version = "0.1.0"
+authors = ["nekitdev <nekit@nekit.dev>"]
+edition = "2024"
+description = "Refinement types."
+documentation = "https://docs.rs/refinement-types"
+readme = "README.md"
+repository = "https://github.com/nekitdev/refinement-types"
+license = "MIT"
+keywords = ["refinement", "type"]
+categories = ["no-std", "no-std::no-alloc", "rust-patterns"]
+
+[dependencies.paste]
+version = "1.0.15"
+
+[dependencies.regex]
+version = "1.11.1"
+optional = true
+
+[dependencies.serde]
+version = "1.0.218"
+default-features = false
+features = ["derive"]
+optional = true
+
+[dependencies.thiserror]
+version = "2.0.11"
+default-features = false
+
+[features]
+default = ["std"]
+serde = ["dep:serde"]
+regex = ["dep:regex", "std"]
+alloc = []
+std = []
+
+[package.metadata.docs.rs]
+features = ["regex", "serde", "std"]
+rustdoc-args = ["--cfg", "docsrs"]
