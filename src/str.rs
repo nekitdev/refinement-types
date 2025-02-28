@@ -246,7 +246,7 @@ impl<T: AsRef<str> + ?Sized, const C: char> Predicate<T> for ContainsChar<C> {
 }
 
 /// Represents errors that occur when the string is not trimmed at the start.
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Default)]
 #[error("expected string to be trimmed at the start")]
 pub struct IsTrimmedStartError;
 
@@ -280,7 +280,7 @@ impl<T: AsRef<str> + ?Sized> Predicate<T> for IsTrimmedStart {
 }
 
 /// Represents errors that occur when the string is not trimmed at the end.
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Default)]
 #[error("expected string to be trimmed at the end")]
 pub struct IsTrimmedEndError;
 
@@ -314,7 +314,7 @@ impl<T: AsRef<str> + ?Sized> Predicate<T> for IsTrimmedEnd {
 }
 
 /// Represents errors that occur when the string is not trimmed.
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Default)]
 #[error("expected string to be trimmed")]
 pub struct IsTrimmedError;
 
@@ -348,7 +348,7 @@ impl<T: AsRef<str> + ?Sized> Predicate<T> for IsTrimmed {
 }
 
 /// Represents errors that occur when the string is not valid ASCII.
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Default)]
 #[error("expected string to be ascii")]
 pub struct IsAsciiError;
 

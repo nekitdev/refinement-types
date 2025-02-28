@@ -1,6 +1,6 @@
 [context]
 name = "refinement-types"
-version = "0.1.0"
+version = "0.0.0"
 url = "https://github.com/nekitdev/refinement-types"
 
 [formats]

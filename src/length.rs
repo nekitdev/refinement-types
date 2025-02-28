@@ -218,6 +218,7 @@ pub struct Ne<const N: usize>;
 impl<const N: usize, T: HasLength + ?Sized> Predicate<T> for Ne<N> {
     type Error = NeError;
 
+    #[allow(clippy::if_not_else)]
     fn check(value: &T) -> Result<(), Self::Error> {
         if value.length() != N {
             Ok(())

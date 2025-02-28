@@ -71,7 +71,7 @@ macro_rules! predicate {
         Expected = $expected: expr,
     ) => {
         paste! {
-            #[derive(Debug, Error)]
+            #[derive(Debug, Error, Default)]
             #[error($message)]
             #[doc = $error]
             pub struct [<Non $name Error>];

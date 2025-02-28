@@ -21,7 +21,7 @@ Or by directly specifying it in the configuration like so:
 
 ```toml
 [dependencies]
-refinement-types = "0.1.0"
+refinement-types = "0.0.0"
 ```
 
 Alternatively, you can add it directly from the source:
@@ -33,11 +33,70 @@ git = "https://github.com/nekitdev/refinement-types.git"
 
 ## Examples
 
-TODO
+### Library
 
-## Features
+```rust
+// lib.rs
 
-TODO
+#![no_std]
+
+use core::fmt;
+
+use refinement_types::{Refinement, int::U8Closed, length::Closed, logic::And, str::IsAscii};
+
+/// Represents device names.
+pub type Name<'n> = Refinement<&'n str, And<Closed<1, 32>, IsAscii>>;
+
+/// Represents device charge, in percentage.
+pub type Charge = Refinement<u8, U8Closed<1, 100>>;
+
+/// Represents devices.
+#[derive(Debug)]
+pub struct Device<'d> {
+    /// The name of the device.
+    name: Name<'d>,
+    /// The charge of the device.
+    charge: Charge,
+}
+
+impl fmt::Display for Device<'_> {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            formatter,
+            "{name}: {charge}%",
+            name = self.name,
+            charge = self.charge
+        )
+    }
+}
+
+impl<'d> Device<'d> {
+    /// Constructs [`Self`].
+    pub fn new(name: Name<'d>, charge: Charge) -> Self {
+        Self { name, charge }
+    }
+}
+```
+
+### Binary
+
+```rust
+// main.rs
+
+use device::{Charge, Device, Name};
+use refinement_types::MessageError;
+
+fn main() -> Result<(), MessageError> {
+    let charge = Charge::refine(69)?;
+    let name = Name::refine("nekit")?;
+
+    let device = Device::new(name, charge);
+
+    println!("{device}"); // nekit: 69%
+
+    Ok(())
+}
+```
 
 ## Documentation
 

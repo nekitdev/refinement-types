@@ -1,7 +1,15 @@
 //! Refinement types.
+//!
+//! # Examples
+//!
+//! TODO
+//!
+//! # Features
+//!
+//! TODO
 
 #![cfg_attr(not(feature = "std"), no_std)]
-#![warn(missing_docs)]
+#![deny(missing_docs)]
 #![cfg_attr(docsrs, feature(auto_doc_cfg))]
 
 #[cfg(feature = "alloc")]
@@ -22,10 +30,9 @@ pub mod type_str;
 #[macro_use]
 pub mod type_regex;
 
-pub use core::{Error, Predicate, Refinement};
-pub use logic::{And, False, Imply, Nand, Nor, Not, Or, True, Xnor, Xor};
+pub use core::{ErasedError, Error, MessageError, Predicate, Refinement};
 pub use static_str::StaticStr;
 pub use type_str::TypeStr;
 
 #[cfg(feature = "regex")]
-pub use type_regex::{StaticRegex, TypeRegex};
+pub use type_regex::{Regex, StaticRegex, TypeRegex};

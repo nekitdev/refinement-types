@@ -14,7 +14,7 @@ pub trait HasEmpty {
 }
 
 /// Represents errors that occur when the provided value is non-empty.
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Default)]
 #[error("received non-empty value")]
 pub struct NonEmptyError;
 

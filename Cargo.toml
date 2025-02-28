@@ -1,6 +1,6 @@
 [package]
 name = "refinement-types"
-version = "0.1.0"
+version = "0.0.0"
 authors = ["nekitdev <nekit@nekit.dev>"]
 edition = "2024"
 description = "Refinement types."
@@ -28,6 +28,10 @@ optional = true
 version = "2.0.11"
 default-features = false
 
+[dev-dependencies.refinement-types]
+features = ["regex", "serde"]
+path = "."
+
 [features]
 default = ["std"]
 serde = ["dep:serde"]
@@ -36,5 +40,5 @@ alloc = []
 std = []
 
 [package.metadata.docs.rs]
-features = ["regex", "serde", "std"]
+features = ["regex", "serde"]
 rustdoc-args = ["--cfg", "docsrs"]

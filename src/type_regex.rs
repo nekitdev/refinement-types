@@ -24,6 +24,34 @@ pub trait TypeRegex {
 pub const INVALID: StaticStr = "invalid regex";
 
 /// Lifts strings to type-level regular expressions.
+///
+/// ```
+/// use refinement_types::type_regex;
+///
+/// type_regex!(Integer = "^0|[1-9][0-9]*$");
+/// ```
+///
+/// Is equivalent to:
+///
+/// ```
+/// use std::sync::LazyLock;
+///
+/// use refinement_types::{Regex, StaticRegex, TypeRegex};
+///
+/// #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+/// struct Integer;
+///
+/// impl TypeRegex for Integer {
+///     fn get() -> StaticRegex {
+///         static REGEX: LazyLock<Regex> = LazyLock::new(|| {
+///             Regex::new("^0|[1-9][0-9]*$").expect("invalid regex")
+///         });
+///
+///         LazyLock::force(&REGEX)
+///     }
+/// }
+/// ```
+///
 #[macro_export]
 macro_rules! type_regex {
     ($vis: vis $name: ident = $regex: expr $(=> $doc: expr)?) => {
