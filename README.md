@@ -21,7 +21,7 @@ Or by directly specifying it in the configuration like so:
 
 ```toml
 [dependencies]
-refinement-types = "0.0.0"
+refinement-types = "0.1.0"
 ```
 
 Alternatively, you can add it directly from the source:

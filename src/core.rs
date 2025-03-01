@@ -145,6 +145,12 @@ impl<T: Hash, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> Hash for Refinement
     }
 }
 
+impl<T, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> AsRef<T> for Refinement<T, P, C> {
+    fn as_ref(&self) -> &T {
+        self.get()
+    }
+}
+
 impl<T, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> Deref for Refinement<T, P, C> {
     type Target = T;
 
@@ -350,11 +356,20 @@ impl<T, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> Refinement<T, P, C> {
     ///
     /// Returns [`struct@Error`] if the value does not satisfy the predicate.
     pub fn refine(value: T) -> Result<Self, Error<T, P, C>> {
-        match P::check(&value) {
+        match Self::check(&value) {
             // SAFETY: the value satisfies the predicate if the check is successful
             Ok(()) => Ok(unsafe { Self::unchecked(value) }),
             Err(error) => Err(Error::new(value, error)),
         }
+    }
+
+    /// Checks the given value.
+    ///
+    /// # Errors
+    ///
+    /// Returns the error produced by the predicate if the value does not satisfy it.
+    pub fn check(value: &T) -> Result<(), P::Error> {
+        P::check(value)
     }
 
     /// Maps the value of the refinement.
