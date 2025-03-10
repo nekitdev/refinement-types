@@ -21,7 +21,7 @@ Or by directly specifying it in the configuration like so:
 
 ```toml
 [dependencies]
-refinement-types = "0.1.0"
+refinement-types = "0.2.0"
 ```
 
 Alternatively, you can add it directly from the source:
@@ -42,13 +42,13 @@ git = "https://github.com/nekitdev/refinement-types.git"
 
 use core::fmt;
 
-use refinement_types::{Refinement, int::U8Closed, length::Closed, logic::And, str::IsAscii};
+use refinement_types::{Refinement, int::u8, length, logic::And, str};
 
 /// Represents device names.
-pub type Name<'n> = Refinement<&'n str, And<Closed<1, 32>, IsAscii>>;
+pub type Name<'n> = Refinement<&'n str, And<str::Ascii, length::Closed<1, 32>>>;
 
 /// Represents device charge, in percentage.
-pub type Charge = Refinement<u8, U8Closed<1, 100>>;
+pub type Charge = Refinement<u8, u8::Closed<1, 100>>;
 
 /// Represents devices.
 #[derive(Debug)]
@@ -83,16 +83,16 @@ impl<'d> Device<'d> {
 ```rust
 // main.rs
 
+use anyhow::Result;
 use device::{Charge, Device, Name};
-use refinement_types::MessageError;
 
-fn main() -> Result<(), MessageError> {
-    let charge = Charge::refine(69)?;
+fn main() -> Result<()> {
+    let charge = Charge::refine(13)?;
     let name = Name::refine("nekit")?;
 
     let device = Device::new(name, charge);
 
-    println!("{device}"); // nekit: 69%
+    println!("{device}"); // nekit: 13%
 
     Ok(())
 }

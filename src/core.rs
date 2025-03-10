@@ -301,7 +301,7 @@ where
     P::Error: ErrorCore + 'static,
 {
     fn source(&self) -> Option<&(dyn ErrorCore + 'static)> {
-        Some(&self.error)
+        Some(self.error())
     }
 }
 
@@ -319,7 +319,7 @@ where
     }
 
     fn diagnostic_source(&self) -> Option<&dyn Diagnostic> {
-        Some(&self.error)
+        Some(self.error())
     }
 }
 
@@ -436,6 +436,7 @@ impl<T, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> Refinement<T, P, H> {
     }
 
     /// Returns a reference to the value of the refinement.
+    #[allow(clippy::missing_const_for_fn)]
     pub fn get(&self) -> &T {
         #[cfg(feature = "unsafe-assert")]
         self.assert_refined();

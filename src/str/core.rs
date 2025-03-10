@@ -2,18 +2,29 @@
 
 use core::{fmt, marker::PhantomData};
 
+#[cfg(feature = "diagnostics")]
+use miette::Diagnostic;
+
 use thiserror::Error;
 
 use crate::{core::Predicate, static_str::StaticStr, type_str::TypeStr};
 
 #[cfg(feature = "regex")]
-use crate::type_regex::TypeRegex;
+use crate::type_regex::{StaticRegex, TypeRegex};
 
 /// Represents errors that occur when the string does not start with [`prefix`].
 ///
 /// [`prefix`]: Self::prefix
 #[derive(Debug, Error)]
 #[error("expected string to start with `{prefix}`")]
+#[cfg_attr(
+    feature = "diagnostics",
+    derive(Diagnostic),
+    diagnostic(
+        code(str::starts_with),
+        help("make sure the string starts with `{prefix}`")
+    )
+)]
 pub struct StartsWithError {
     /// The expected prefix.
     pub prefix: StaticStr,
@@ -32,14 +43,23 @@ pub struct StartsWith<S: TypeStr + ?Sized> {
     prefix: PhantomData<S>,
 }
 
+impl<S: TypeStr + ?Sized> StartsWith<S> {
+    /// Returns the expected prefix.
+    pub const fn prefix() -> StaticStr {
+        S::VALUE
+    }
+}
+
 impl<T: AsRef<str> + ?Sized, S: TypeStr + ?Sized> Predicate<T> for StartsWith<S> {
     type Error = StartsWithError;
 
     fn check(value: &T) -> Result<(), Self::Error> {
-        if value.as_ref().starts_with(S::VALUE) {
+        let prefix = Self::prefix();
+
+        if value.as_ref().starts_with(prefix) {
             Ok(())
         } else {
-            Err(Self::Error::new(S::VALUE))
+            Err(Self::Error::new(prefix))
         }
     }
 
@@ -47,8 +67,12 @@ impl<T: AsRef<str> + ?Sized, S: TypeStr + ?Sized> Predicate<T> for StartsWith<S>
         write!(
             formatter,
             "string starting with `{prefix}`",
-            prefix = S::VALUE
+            prefix = Self::prefix()
         )
+    }
+
+    fn expect_code(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str("str::starts_with")
     }
 }
 
@@ -57,6 +81,14 @@ impl<T: AsRef<str> + ?Sized, S: TypeStr + ?Sized> Predicate<T> for StartsWith<S>
 /// [`suffix`]: Self::suffix
 #[derive(Debug, Error)]
 #[error("expected string to end with `{suffix}`")]
+#[cfg_attr(
+    feature = "diagnostics",
+    derive(Diagnostic),
+    diagnostic(
+        code(str::ends_with),
+        help("make sure the string ends with `{suffix}`")
+    )
+)]
 pub struct EndsWithError {
     /// The expected suffix.
     pub suffix: StaticStr,
@@ -75,14 +107,23 @@ pub struct EndsWith<S: TypeStr + ?Sized> {
     suffix: PhantomData<S>,
 }
 
+impl<S: TypeStr + ?Sized> EndsWith<S> {
+    /// Returns the expected suffix.
+    pub const fn suffix() -> StaticStr {
+        S::VALUE
+    }
+}
+
 impl<T: AsRef<str> + ?Sized, S: TypeStr + ?Sized> Predicate<T> for EndsWith<S> {
     type Error = EndsWithError;
 
     fn check(value: &T) -> Result<(), Self::Error> {
-        if value.as_ref().ends_with(S::VALUE) {
+        let suffix = Self::suffix();
+
+        if value.as_ref().ends_with(suffix) {
             Ok(())
         } else {
-            Err(Self::Error::new(S::VALUE))
+            Err(Self::Error::new(suffix))
         }
     }
 
@@ -90,8 +131,12 @@ impl<T: AsRef<str> + ?Sized, S: TypeStr + ?Sized> Predicate<T> for EndsWith<S> {
         write!(
             formatter,
             "string ending with `{suffix}`",
-            suffix = S::VALUE
+            suffix = Self::suffix()
         )
+    }
+
+    fn expect_code(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str("str::ends_with")
     }
 }
 
@@ -100,6 +145,11 @@ impl<T: AsRef<str> + ?Sized, S: TypeStr + ?Sized> Predicate<T> for EndsWith<S> {
 /// [`string`]: Self::string
 #[derive(Debug, Error)]
 #[error("expected string to contain `{string}`")]
+#[cfg_attr(
+    feature = "diagnostics",
+    derive(Diagnostic),
+    diagnostic(code(str::contains), help("make sure the string contains `{string}`"))
+)]
 pub struct ContainsError {
     /// The expected string.
     pub string: StaticStr,
@@ -118,19 +168,36 @@ pub struct Contains<S: TypeStr + ?Sized> {
     string: PhantomData<S>,
 }
 
+impl<S: TypeStr + ?Sized> Contains<S> {
+    /// Returns the expected string.
+    pub const fn string() -> StaticStr {
+        S::VALUE
+    }
+}
+
 impl<T: AsRef<str> + ?Sized, S: TypeStr + ?Sized> Predicate<T> for Contains<S> {
     type Error = ContainsError;
 
     fn check(value: &T) -> Result<(), Self::Error> {
-        if value.as_ref().contains(S::VALUE) {
+        let string = Self::string();
+
+        if value.as_ref().contains(string) {
             Ok(())
         } else {
-            Err(Self::Error::new(S::VALUE))
+            Err(Self::Error::new(string))
         }
     }
 
     fn expect(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(formatter, "string containing `{string}`", string = S::VALUE)
+        write!(
+            formatter,
+            "string containing `{string}`",
+            string = Self::string()
+        )
+    }
+
+    fn expect_code(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str("str::contains")
     }
 }
 
@@ -139,6 +206,14 @@ impl<T: AsRef<str> + ?Sized, S: TypeStr + ?Sized> Predicate<T> for Contains<S> {
 /// [`start`]: Self::start
 #[derive(Debug, Error)]
 #[error("expected string to start with `{start}`")]
+#[cfg_attr(
+    feature = "diagnostics",
+    derive(Diagnostic),
+    diagnostic(
+        code(str::starts_with_char),
+        help("make sure the string starts with `{start}`")
+    )
+)]
 pub struct StartsWithCharError {
     /// The expected starting character.
     pub start: char,
@@ -169,6 +244,10 @@ impl<T: AsRef<str> + ?Sized, const C: char> Predicate<T> for StartsWithChar<C> {
     fn expect(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(formatter, "string starting with `{C}`")
     }
+
+    fn expect_code(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str("str::starts_with_char")
+    }
 }
 
 /// Represents errors that occur when the string does not end with [`end`] character.
@@ -176,6 +255,14 @@ impl<T: AsRef<str> + ?Sized, const C: char> Predicate<T> for StartsWithChar<C> {
 /// [`end`]: Self::end
 #[derive(Debug, Error)]
 #[error("expected string to end with `{end}`")]
+#[cfg_attr(
+    feature = "diagnostics",
+    derive(Diagnostic),
+    diagnostic(
+        code(str::ends_with_char),
+        help("make sure the string ends with `{end}`")
+    )
+)]
 pub struct EndsWithCharError {
     /// The expected ending character.
     pub end: char,
@@ -206,6 +293,10 @@ impl<T: AsRef<str> + ?Sized, const C: char> Predicate<T> for EndsWithChar<C> {
     fn expect(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(formatter, "string ending with `{C}`")
     }
+
+    fn expect_code(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str("str::ends_with<{C}>")
+    }
 }
 
 /// Represents errors that occur when the string does not contain [`character`].
@@ -213,6 +304,14 @@ impl<T: AsRef<str> + ?Sized, const C: char> Predicate<T> for EndsWithChar<C> {
 /// [`character`]: Self::character
 #[derive(Debug, Error)]
 #[error("expected string to contain `{character}`")]
+#[cfg_attr(
+    feature = "diagnostics",
+    derive(Diagnostic),
+    diagnostic(
+        code(str::contains_char),
+        help("make sure the string contains `{character}`")
+    )
+)]
 pub struct ContainsCharError {
     /// The expected character.
     pub character: char,
@@ -243,11 +342,23 @@ impl<T: AsRef<str> + ?Sized, const C: char> Predicate<T> for ContainsChar<C> {
     fn expect(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(formatter, "string containing `{C}`")
     }
+
+    fn expect_code(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str("str::contains<{C}>")
+    }
 }
 
 /// Represents errors that occur when the string is not trimmed at the start.
 #[derive(Debug, Error, Default)]
 #[error("expected string to be trimmed at the start")]
+#[cfg_attr(
+    feature = "diagnostics",
+    derive(Diagnostic),
+    diagnostic(
+        code(str::trimmed_start),
+        help("make sure the string is trimmed at the start")
+    )
+)]
 pub struct TrimmedStartError;
 
 impl TrimmedStartError {
@@ -277,11 +388,23 @@ impl<T: AsRef<str> + ?Sized> Predicate<T> for TrimmedStart {
     fn expect(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter.write_str("string trimmed at the start")
     }
+
+    fn expect_code(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str("str::trimmed_start")
+    }
 }
 
 /// Represents errors that occur when the string is not trimmed at the end.
 #[derive(Debug, Error, Default)]
 #[error("expected string to be trimmed at the end")]
+#[cfg_attr(
+    feature = "diagnostics",
+    derive(Diagnostic),
+    diagnostic(
+        code(str::trimmed_end),
+        help("make sure the string is trimmed at the end")
+    )
+)]
 pub struct TrimmedEndError;
 
 impl TrimmedEndError {
@@ -311,11 +434,20 @@ impl<T: AsRef<str> + ?Sized> Predicate<T> for TrimmedEnd {
     fn expect(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter.write_str("string trimmed at the end")
     }
+
+    fn expect_code(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str("str::trimmed_end")
+    }
 }
 
 /// Represents errors that occur when the string is not trimmed.
 #[derive(Debug, Error, Default)]
 #[error("expected string to be trimmed")]
+#[cfg_attr(
+    feature = "diagnostics",
+    derive(Diagnostic),
+    diagnostic(code(str::trimmed), help("make sure the string is trimmed"))
+)]
 pub struct TrimmedError;
 
 impl TrimmedError {
@@ -345,11 +477,20 @@ impl<T: AsRef<str> + ?Sized> Predicate<T> for Trimmed {
     fn expect(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter.write_str("trimmed string")
     }
+
+    fn expect_code(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str("str::trimmed")
+    }
 }
 
 /// Represents errors that occur when the string is not valid ASCII.
 #[derive(Debug, Error, Default)]
 #[error("expected string to be ascii")]
+#[cfg_attr(
+    feature = "diagnostics",
+    derive(Diagnostic),
+    diagnostic(code(str::ascii), help("make sure the string is ascii"))
+)]
 pub struct AsciiError;
 
 impl AsciiError {
@@ -377,6 +518,10 @@ impl<T: AsRef<str> + ?Sized> Predicate<T> for Ascii {
     fn expect(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter.write_str("ascii string")
     }
+
+    fn expect_code(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str("str::ascii")
+    }
 }
 
 /// Represents errors that occur when the string does not match the expected [`pattern`].
@@ -385,6 +530,14 @@ impl<T: AsRef<str> + ?Sized> Predicate<T> for Ascii {
 #[cfg(feature = "regex")]
 #[derive(Debug, Error)]
 #[error("received string that does not match the `{pattern}` pattern")]
+#[cfg_attr(
+    feature = "diagnostics",
+    derive(Diagnostic),
+    diagnostic(
+        code(str::matches),
+        help("make sure the string matches the `{pattern}` pattern")
+    )
+)]
 pub struct MismatchError {
     /// The expected pattern.
     pub pattern: StaticStr,
@@ -406,11 +559,19 @@ pub struct Matches<S: TypeRegex + ?Sized> {
 }
 
 #[cfg(feature = "regex")]
+impl<S: TypeRegex + ?Sized> Matches<S> {
+    /// Returns the expected regular expression.
+    pub fn regex() -> StaticRegex {
+        S::get()
+    }
+}
+
+#[cfg(feature = "regex")]
 impl<T: AsRef<str> + ?Sized, S: TypeRegex + ?Sized> Predicate<T> for Matches<S> {
     type Error = MismatchError;
 
     fn check(value: &T) -> Result<(), Self::Error> {
-        let regex = S::get();
+        let regex = Self::regex();
 
         if regex.is_match(value.as_ref()) {
             Ok(())
@@ -423,7 +584,11 @@ impl<T: AsRef<str> + ?Sized, S: TypeRegex + ?Sized> Predicate<T> for Matches<S> 
         write!(
             formatter,
             "string matching the `{pattern}` pattern",
-            pattern = S::get().as_str()
+            pattern = Self::regex().as_str()
         )
+    }
+
+    fn expect_code(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str("str::matches")
     }
 }

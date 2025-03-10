@@ -9,7 +9,7 @@
 //! TODO
 
 #![cfg_attr(not(feature = "std"), no_std)]
-#![warn(missing_docs)]
+#![deny(missing_docs)]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 
 #[cfg(feature = "alloc")]
@@ -23,7 +23,7 @@ pub mod length;
 #[macro_use]
 pub mod logic;
 pub mod static_str;
-// pub mod str;
+pub mod str;
 #[macro_use]
 pub mod type_str;
 

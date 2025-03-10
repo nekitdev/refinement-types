@@ -1,6 +1,6 @@
 [package]
 name = "refinement-types"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["nekitdev <nekit@nekit.dev>"]
 edition = "2024"
 description = "Refinement types."
@@ -13,8 +13,6 @@ categories = ["no-std", "no-std::no-alloc", "rust-patterns"]
 
 [dependencies.miette]
 version = "7.5.0"
-# TODO: remove this
-features = ["fancy"]
 optional = true
 
 [dependencies.paste]
@@ -39,8 +37,7 @@ features = ["regex", "serde"]
 path = "."
 
 [features]
-# TODO: `std` feature by default
-default = ["diagnostics"]
+default = ["std"]
 serde = ["dep:serde"]
 regex = ["dep:regex", "std"]
 diagnostics = ["dep:miette", "std"]
