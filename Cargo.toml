@@ -11,6 +11,12 @@ license = "MIT"
 keywords = ["refinement", "type"]
 categories = ["no-std", "no-std::no-alloc", "rust-patterns"]
 
+[dependencies.miette]
+version = "7.5.0"
+# TODO: remove this
+features = ["fancy"]
+optional = true
+
 [dependencies.paste]
 version = "1.0.15"
 
@@ -33,9 +39,12 @@ features = ["regex", "serde"]
 path = "."
 
 [features]
-default = ["std"]
+# TODO: `std` feature by default
+default = ["diagnostics"]
 serde = ["dep:serde"]
 regex = ["dep:regex", "std"]
+diagnostics = ["dep:miette", "std"]
+unsafe-assert = []
 alloc = []
 std = []
 

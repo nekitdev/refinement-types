@@ -6,7 +6,7 @@ use crate::static_str::StaticStr;
 
 #[doc(hidden)]
 pub mod import {
-    pub use std::sync::LazyLock;
+    pub use std::{fmt, sync::LazyLock};
 }
 
 /// Represents static regular expressions (as returned in [`get`] of [`TypeRegex`]).
@@ -34,7 +34,7 @@ pub const INVALID: StaticStr = "invalid regex";
 /// Is equivalent to:
 ///
 /// ```
-/// use std::sync::LazyLock;
+/// use std::{fmt, sync::LazyLock};
 ///
 /// use refinement_types::{Regex, StaticRegex, TypeRegex};
 ///
@@ -50,8 +50,13 @@ pub const INVALID: StaticStr = "invalid regex";
 ///         LazyLock::force(&REGEX)
 ///     }
 /// }
-/// ```
 ///
+/// impl fmt::Display for Integer {
+///     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+///         Self::get().fmt(formatter)
+///     }
+/// }
+/// ```
 #[macro_export]
 macro_rules! type_regex {
     ($vis: vis $name: ident = $regex: expr $(=> $doc: expr)?) => {
@@ -70,6 +75,16 @@ macro_rules! type_regex {
                 });
 
                 LazyLock::force(&REGEX)
+            }
+        }
+
+        impl $crate::type_regex::import::fmt::Display for $name {
+            fn fmt(
+                &self, formatter: &mut $crate::type_regex::import::fmt::Formatter<'_>
+            ) -> $crate::type_regex::import::fmt::Result {
+                use $crate::type_regex::TypeRegex;
+
+                Self::get().fmt(formatter)
             }
         }
     };

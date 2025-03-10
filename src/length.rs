@@ -2,6 +2,9 @@
 
 use core::fmt;
 
+#[cfg(feature = "diagnostics")]
+use miette::Diagnostic;
+
 use thiserror::Error;
 
 use crate::{
@@ -18,25 +21,30 @@ pub trait HasLength {
 /// Represents errors that occur when the provided value has
 /// length greater than or equal to some bound.
 #[derive(Debug, Error)]
-#[error("received value with length >= {against}")]
-pub struct LtError {
+#[error("received value with length >= {other}")]
+#[cfg_attr(
+    feature = "diagnostics",
+    derive(Diagnostic),
+    diagnostic(code(length::lt), help("make sure the length is less than {other}"))
+)]
+pub struct LessError {
     /// The length against which the check was performed (the `N`).
-    pub against: usize,
+    pub other: usize,
 }
 
-impl LtError {
+impl LessError {
     /// Constructs [`Self`].
-    pub const fn new(against: usize) -> Self {
-        Self { against }
+    pub const fn new(other: usize) -> Self {
+        Self { other }
     }
 }
 
 /// Checks whether the given value has length less than `N`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct Lt<const N: usize>;
+pub struct Less<const N: usize>;
 
-impl<const N: usize, T: HasLength + ?Sized> Predicate<T> for Lt<N> {
-    type Error = LtError;
+impl<const N: usize, T: HasLength + ?Sized> Predicate<T> for Less<N> {
+    type Error = LessError;
 
     fn check(value: &T) -> Result<(), Self::Error> {
         if value.length() < N {
@@ -49,30 +57,42 @@ impl<const N: usize, T: HasLength + ?Sized> Predicate<T> for Lt<N> {
     fn expect(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(formatter, "value with length < {N}")
     }
+
+    fn expect_code(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(formatter, "length::lt<{N}>")
+    }
 }
 
 /// Represents errors that occur when the provided value has
 /// length greater than some bound.
 #[derive(Debug, Error)]
-#[error("received value with length > {against}")]
-pub struct LeError {
+#[error("received value with length > {other}")]
+#[cfg_attr(
+    feature = "diagnostics",
+    derive(Diagnostic),
+    diagnostic(
+        code(length::le),
+        help("make sure the length is less than or equal to {other}")
+    )
+)]
+pub struct LessOrEqualError {
     /// The length against which the check was performed (the `N`).
-    pub against: usize,
+    pub other: usize,
 }
 
-impl LeError {
+impl LessOrEqualError {
     /// Constructs [`Self`].
-    pub const fn new(against: usize) -> Self {
-        Self { against }
+    pub const fn new(other: usize) -> Self {
+        Self { other }
     }
 }
 
 /// Checks whether the given value has length less than or equal to `N`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct Le<const N: usize>;
+pub struct LessOrEqual<const N: usize>;
 
-impl<const N: usize, T: HasLength + ?Sized> Predicate<T> for Le<N> {
-    type Error = LeError;
+impl<const N: usize, T: HasLength + ?Sized> Predicate<T> for LessOrEqual<N> {
+    type Error = LessOrEqualError;
 
     fn check(value: &T) -> Result<(), Self::Error> {
         if value.length() <= N {
@@ -85,30 +105,39 @@ impl<const N: usize, T: HasLength + ?Sized> Predicate<T> for Le<N> {
     fn expect(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(formatter, "value with length <= {N}")
     }
+
+    fn expect_code(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(formatter, "length::le<{N}>")
+    }
 }
 
 /// Represents errors that occur when the provided value has
 /// length less than or equal to some bound.
 #[derive(Debug, Error)]
-#[error("received value with length <= {against}")]
-pub struct GtError {
+#[error("received value with length <= {other}")]
+#[cfg_attr(
+    feature = "diagnostics",
+    derive(Diagnostic),
+    diagnostic(code(length::gt), help("make sure the length is greater than {other}"))
+)]
+pub struct GreaterError {
     /// The length against which the check was performed (the `N`).
-    pub against: usize,
+    pub other: usize,
 }
 
-impl GtError {
+impl GreaterError {
     /// Constructs [`Self`].
-    pub const fn new(against: usize) -> Self {
-        Self { against }
+    pub const fn new(other: usize) -> Self {
+        Self { other }
     }
 }
 
 /// Checks whether the given value has length greater than `N`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct Gt<const N: usize>;
+pub struct Greater<const N: usize>;
 
-impl<const N: usize, T: HasLength + ?Sized> Predicate<T> for Gt<N> {
-    type Error = GtError;
+impl<const N: usize, T: HasLength + ?Sized> Predicate<T> for Greater<N> {
+    type Error = GreaterError;
 
     fn check(value: &T) -> Result<(), Self::Error> {
         if value.length() > N {
@@ -121,30 +150,42 @@ impl<const N: usize, T: HasLength + ?Sized> Predicate<T> for Gt<N> {
     fn expect(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(formatter, "value with length > {N}")
     }
+
+    fn expect_code(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(formatter, "length::gt<{N}>")
+    }
 }
 
 /// Represents errors that occur when the provided value has
 /// length less than some bound.
 #[derive(Debug, Error)]
-#[error("received value with length < {against}")]
-pub struct GeError {
+#[error("received value with length < {other}")]
+#[cfg_attr(
+    feature = "diagnostics",
+    derive(Diagnostic),
+    diagnostic(
+        code(length::ge),
+        help("make sure the length is greater than or equal to {other}")
+    )
+)]
+pub struct GreaterOrEqualError {
     /// The length against which the check was performed (the `N`).
-    pub against: usize,
+    pub other: usize,
 }
 
-impl GeError {
+impl GreaterOrEqualError {
     /// Constructs [`Self`].
-    pub const fn new(against: usize) -> Self {
-        Self { against }
+    pub const fn new(other: usize) -> Self {
+        Self { other }
     }
 }
 
 /// Checks whether the given value has length greater than or equal to `N`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct Ge<const N: usize>;
+pub struct GreaterOrEqual<const N: usize>;
 
-impl<const N: usize, T: HasLength + ?Sized> Predicate<T> for Ge<N> {
-    type Error = GeError;
+impl<const N: usize, T: HasLength + ?Sized> Predicate<T> for GreaterOrEqual<N> {
+    type Error = GreaterOrEqualError;
 
     fn check(value: &T) -> Result<(), Self::Error> {
         if value.length() >= N {
@@ -157,30 +198,39 @@ impl<const N: usize, T: HasLength + ?Sized> Predicate<T> for Ge<N> {
     fn expect(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(formatter, "value with length >= {N}")
     }
+
+    fn expect_code(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(formatter, "length::ge<{N}>")
+    }
 }
 
 /// Represents errors that occur when the provided value has
 /// length not equal to some bound.
 #[derive(Debug, Error)]
-#[error("received value with length != {against}")]
-pub struct EqError {
+#[error("received value with length != {other}")]
+#[cfg_attr(
+    feature = "diagnostics",
+    derive(Diagnostic),
+    diagnostic(code(length::eq), help("make sure the length is equal to {other}"))
+)]
+pub struct EqualError {
     /// The length against which the check was performed (the `N`).
-    pub against: usize,
+    pub other: usize,
 }
 
-impl EqError {
+impl EqualError {
     /// Constructs [`Self`].
-    pub const fn new(against: usize) -> Self {
-        Self { against }
+    pub const fn new(other: usize) -> Self {
+        Self { other }
     }
 }
 
 /// Checks whether the given value has length equal to `N`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct Eq<const N: usize>;
+pub struct Equal<const N: usize>;
 
-impl<const N: usize, T: HasLength + ?Sized> Predicate<T> for Eq<N> {
-    type Error = EqError;
+impl<const N: usize, T: HasLength + ?Sized> Predicate<T> for Equal<N> {
+    type Error = EqualError;
 
     fn check(value: &T) -> Result<(), Self::Error> {
         if value.length() == N {
@@ -193,30 +243,39 @@ impl<const N: usize, T: HasLength + ?Sized> Predicate<T> for Eq<N> {
     fn expect(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(formatter, "value with length == {N}")
     }
+
+    fn expect_code(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(formatter, "length::eq<{N}>")
+    }
 }
 
 /// Represents errors that occur when the provided value has
 /// length equal to some bound.
 #[derive(Debug, Error)]
-#[error("received value with length == {against}")]
-pub struct NeError {
+#[error("received value with length == {other}")]
+#[cfg_attr(
+    feature = "diagnostics",
+    derive(Diagnostic),
+    diagnostic(code(length::ne), help("make sure the length is not equal to {other}"))
+)]
+pub struct NotEqualError {
     /// The length against which the check was performed (the `N`).
-    pub against: usize,
+    pub other: usize,
 }
 
-impl NeError {
+impl NotEqualError {
     /// Constructs [`Self`].
-    pub const fn new(against: usize) -> Self {
-        Self { against }
+    pub const fn new(other: usize) -> Self {
+        Self { other }
     }
 }
 
 /// Checks whether the given value has length not equal to `N`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct Ne<const N: usize>;
+pub struct NotEqual<const N: usize>;
 
-impl<const N: usize, T: HasLength + ?Sized> Predicate<T> for Ne<N> {
-    type Error = NeError;
+impl<const N: usize, T: HasLength + ?Sized> Predicate<T> for NotEqual<N> {
+    type Error = NotEqualError;
 
     #[allow(clippy::if_not_else)]
     fn check(value: &T) -> Result<(), Self::Error> {
@@ -230,25 +289,29 @@ impl<const N: usize, T: HasLength + ?Sized> Predicate<T> for Ne<N> {
     fn expect(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(formatter, "value with length != {N}")
     }
+
+    fn expect_code(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(formatter, "length::ne<{N}>")
+    }
 }
 
 /// Represents `(M, N)` intervals.
-pub type Open<const M: usize, const N: usize> = And<Gt<M>, Lt<N>>;
+pub type Open<const M: usize, const N: usize> = And<Greater<M>, Less<N>>;
 
 /// Represents `[M, N)` intervals.
-pub type ClosedOpen<const M: usize, const N: usize> = And<Ge<M>, Lt<N>>;
+pub type ClosedOpen<const M: usize, const N: usize> = And<GreaterOrEqual<M>, Less<N>>;
 
 /// Represents `(M, N]` intervals.
-pub type OpenClosed<const M: usize, const N: usize> = And<Gt<M>, Le<N>>;
+pub type OpenClosed<const M: usize, const N: usize> = And<Greater<M>, LessOrEqual<N>>;
 
 /// Represents `[M, N]` intervals.
-pub type Closed<const M: usize, const N: usize> = And<Ge<M>, Le<N>>;
+pub type Closed<const M: usize, const N: usize> = And<GreaterOrEqual<M>, LessOrEqual<N>>;
 
 /// Checks whether the given value has zero length.
-pub type Zero = Eq<0>;
+pub type Zero = Equal<0>;
 
 /// Checks whether the given value has non-zero length.
-pub type NonZero = Ne<0>;
+pub type NonZero = NotEqual<0>;
 
 /// Represents errors when the provided value has
 /// length divided by [`divisor`] not equal to [`modulo`].
@@ -257,14 +320,14 @@ pub type NonZero = Ne<0>;
 /// [`modulo`]: Self::modulo
 #[derive(Debug, Error)]
 #[error("received value % {divisor} != {modulo}")]
-pub struct ModError {
+pub struct ModuloError {
     /// The divisor that the value length should be divided by (the `D`).
     pub divisor: usize,
     /// The expected modulo of the length division (the `M`).
     pub modulo: usize,
 }
 
-impl ModError {
+impl ModuloError {
     /// Constructs [`Self`].
     pub const fn new(divisor: usize, modulo: usize) -> Self {
         Self { divisor, modulo }
@@ -273,10 +336,10 @@ impl ModError {
 
 /// Checks whether the given value length divided by `D` has modulo `M`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct Mod<const D: usize, const M: usize>;
+pub struct Modulo<const D: usize, const M: usize>;
 
-impl<const D: usize, const M: usize, T: HasLength + ?Sized> Predicate<T> for Mod<D, M> {
-    type Error = ModError;
+impl<const D: usize, const M: usize, T: HasLength + ?Sized> Predicate<T> for Modulo<D, M> {
+    type Error = ModuloError;
 
     fn check(value: &T) -> Result<(), Self::Error> {
         if value.length() % D == M {
@@ -289,13 +352,17 @@ impl<const D: usize, const M: usize, T: HasLength + ?Sized> Predicate<T> for Mod
     fn expect(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(formatter, "length % {D} == {M}")
     }
+
+    fn expect_code(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(formatter, "length::mod<{D}, {M}>")
+    }
 }
 
 /// Checks whether the given value length is divisible by `D`.
-pub type Div<const D: usize> = Mod<D, 0>;
+pub type Divisible<const D: usize> = Modulo<D, 0>;
 
 /// Checks whether the given value length is even.
-pub type Even = Div<2>;
+pub type Even = Divisible<2>;
 
 /// Checks whether the given value length is odd.
 pub type Odd = Not<Even>;

@@ -1,4 +1,4 @@
-//! Predicates for strings.
+//! Core functionality.
 
 use core::{fmt, marker::PhantomData};
 
@@ -248,9 +248,9 @@ impl<T: AsRef<str> + ?Sized, const C: char> Predicate<T> for ContainsChar<C> {
 /// Represents errors that occur when the string is not trimmed at the start.
 #[derive(Debug, Error, Default)]
 #[error("expected string to be trimmed at the start")]
-pub struct IsTrimmedStartError;
+pub struct TrimmedStartError;
 
-impl IsTrimmedStartError {
+impl TrimmedStartError {
     /// Constructs [`Self`].
     pub const fn new() -> Self {
         Self
@@ -259,10 +259,10 @@ impl IsTrimmedStartError {
 
 /// Checks if the string is trimmed at the start.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct IsTrimmedStart;
+pub struct TrimmedStart;
 
-impl<T: AsRef<str> + ?Sized> Predicate<T> for IsTrimmedStart {
-    type Error = IsTrimmedStartError;
+impl<T: AsRef<str> + ?Sized> Predicate<T> for TrimmedStart {
+    type Error = TrimmedStartError;
 
     fn check(value: &T) -> Result<(), Self::Error> {
         let string = value.as_ref();
@@ -282,9 +282,9 @@ impl<T: AsRef<str> + ?Sized> Predicate<T> for IsTrimmedStart {
 /// Represents errors that occur when the string is not trimmed at the end.
 #[derive(Debug, Error, Default)]
 #[error("expected string to be trimmed at the end")]
-pub struct IsTrimmedEndError;
+pub struct TrimmedEndError;
 
-impl IsTrimmedEndError {
+impl TrimmedEndError {
     /// Constructs [`Self`].
     pub const fn new() -> Self {
         Self
@@ -293,10 +293,10 @@ impl IsTrimmedEndError {
 
 /// Checks if the string is trimmed at the end.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct IsTrimmedEnd;
+pub struct TrimmedEnd;
 
-impl<T: AsRef<str> + ?Sized> Predicate<T> for IsTrimmedEnd {
-    type Error = IsTrimmedEndError;
+impl<T: AsRef<str> + ?Sized> Predicate<T> for TrimmedEnd {
+    type Error = TrimmedEndError;
 
     fn check(value: &T) -> Result<(), Self::Error> {
         let string = value.as_ref();
@@ -316,9 +316,9 @@ impl<T: AsRef<str> + ?Sized> Predicate<T> for IsTrimmedEnd {
 /// Represents errors that occur when the string is not trimmed.
 #[derive(Debug, Error, Default)]
 #[error("expected string to be trimmed")]
-pub struct IsTrimmedError;
+pub struct TrimmedError;
 
-impl IsTrimmedError {
+impl TrimmedError {
     /// Constructs [`Self`].
     pub const fn new() -> Self {
         Self
@@ -327,10 +327,10 @@ impl IsTrimmedError {
 
 /// Checks if the string is trimmed.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct IsTrimmed;
+pub struct Trimmed;
 
-impl<T: AsRef<str> + ?Sized> Predicate<T> for IsTrimmed {
-    type Error = IsTrimmedError;
+impl<T: AsRef<str> + ?Sized> Predicate<T> for Trimmed {
+    type Error = TrimmedError;
 
     fn check(value: &T) -> Result<(), Self::Error> {
         let string = value.as_ref();
@@ -350,9 +350,9 @@ impl<T: AsRef<str> + ?Sized> Predicate<T> for IsTrimmed {
 /// Represents errors that occur when the string is not valid ASCII.
 #[derive(Debug, Error, Default)]
 #[error("expected string to be ascii")]
-pub struct IsAsciiError;
+pub struct AsciiError;
 
-impl IsAsciiError {
+impl AsciiError {
     /// Constructs [`Self`].
     pub const fn new() -> Self {
         Self
@@ -361,10 +361,10 @@ impl IsAsciiError {
 
 /// Checks if the string is valid ASCII.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct IsAscii;
+pub struct Ascii;
 
-impl<T: AsRef<str> + ?Sized> Predicate<T> for IsAscii {
-    type Error = IsAsciiError;
+impl<T: AsRef<str> + ?Sized> Predicate<T> for Ascii {
+    type Error = AsciiError;
 
     fn check(value: &T) -> Result<(), Self::Error> {
         if value.as_ref().is_ascii() {

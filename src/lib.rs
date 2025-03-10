@@ -9,7 +9,7 @@
 //! TODO
 
 #![cfg_attr(not(feature = "std"), no_std)]
-#![deny(missing_docs)]
+#![warn(missing_docs)]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 
 #[cfg(feature = "alloc")]
@@ -20,9 +20,10 @@ pub mod core;
 pub mod empty;
 pub mod int;
 pub mod length;
+#[macro_use]
 pub mod logic;
 pub mod static_str;
-pub mod str;
+// pub mod str;
 #[macro_use]
 pub mod type_str;
 
@@ -30,7 +31,8 @@ pub mod type_str;
 #[macro_use]
 pub mod type_regex;
 
-pub use core::{ErasedError, Error, MessageError, Predicate, Refinement};
+pub use core::{Error, ErrorCore, Predicate, Refinement};
+
 pub use static_str::StaticStr;
 pub use type_str::TypeStr;
 

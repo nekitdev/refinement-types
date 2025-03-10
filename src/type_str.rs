@@ -8,6 +8,11 @@ pub trait TypeStr {
     const VALUE: StaticStr;
 }
 
+#[doc(hidden)]
+pub mod import {
+    pub use core::fmt;
+}
+
 /// Lifts static strings to type-level strings.
 ///
 /// # Examples
@@ -21,6 +26,8 @@ pub trait TypeStr {
 /// Is equivalent to:
 ///
 /// ```
+/// use core::fmt;
+///
 /// use refinement_types::{StaticStr, TypeStr};
 ///
 /// #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -28,6 +35,12 @@ pub trait TypeStr {
 ///
 /// impl TypeStr for HelloWorld {
 ///     const VALUE: StaticStr = "Hello, world!";
+/// }
+///
+/// impl fmt::Display for HelloWorld {
+///     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+///         formatter.write_str(Self::VALUE)
+///     }
 /// }
 /// ```
 #[macro_export]
@@ -41,6 +54,16 @@ macro_rules! type_str {
 
         impl $crate::type_str::TypeStr for $name {
             const VALUE: $crate::static_str::StaticStr = $value;
+        }
+
+        impl $crate::type_str::import::fmt::Display for $name {
+            fn fmt(
+                &self, formatter: &mut $crate::type_str::import::fmt::Formatter<'_>
+            ) -> $crate::type_str::import::fmt::Result {
+                use $crate::type_str::TypeStr;
+
+                formatter.write_str(Self::VALUE)
+            }
         }
     };
 }

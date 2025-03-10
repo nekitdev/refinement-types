@@ -4,8 +4,7 @@ use core::fmt;
 
 use thiserror::Error;
 
-use crate::static_str::StaticStr;
-use crate::{core::Predicate, logic::Not};
+use crate::{core::Predicate, logic::Not, static_str::StaticStr};
 
 /// Represents types that have emptiness-checking capabilities.
 pub trait HasEmpty {
@@ -16,9 +15,9 @@ pub trait HasEmpty {
 /// Represents errors that occur when the provided value is non-empty.
 #[derive(Debug, Error, Default)]
 #[error("received non-empty value")]
-pub struct NonEmptyError;
+pub struct EmptyError;
 
-impl NonEmptyError {
+impl EmptyError {
     /// Constructs [`Self`].
     pub const fn new() -> Self {
         Self
@@ -28,12 +27,15 @@ impl NonEmptyError {
 /// The `empty value` literal.
 pub const VALUE: StaticStr = "empty value";
 
+/// The `empty` literal.
+pub const EMPTY: StaticStr = "empty";
+
 /// Checks whether the value is empty.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct IsEmpty;
+pub struct Empty;
 
-impl<T: HasEmpty + ?Sized> Predicate<T> for IsEmpty {
-    type Error = NonEmptyError;
+impl<T: HasEmpty + ?Sized> Predicate<T> for Empty {
+    type Error = EmptyError;
 
     fn check(value: &T) -> Result<(), Self::Error> {
         if value.empty() {
@@ -46,10 +48,14 @@ impl<T: HasEmpty + ?Sized> Predicate<T> for IsEmpty {
     fn expect(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter.write_str(VALUE)
     }
+
+    fn expect_code(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str(EMPTY)
+    }
 }
 
 /// Checks whether the value is non-empty.
-pub type IsNonEmpty = Not<IsEmpty>;
+pub type NonEmpty = Not<Empty>;
 
 // core
 
