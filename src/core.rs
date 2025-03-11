@@ -86,12 +86,12 @@ pub trait Predicate<T: ?Sized> {
 }
 
 /// Represents expectations of predicates.
-pub struct Expected<T: ?Sized, P: Predicate<T> + ?Sized> {
+pub struct Expected<T: ?Sized, P: ?Sized> {
     value: PhantomData<T>,
     predicate: PhantomData<P>,
 }
 
-impl<T: ?Sized, P: Predicate<T> + ?Sized> Expected<T, P> {
+impl<T: ?Sized, P: ?Sized> Expected<T, P> {
     const fn new() -> Self {
         Self {
             value: PhantomData,
@@ -107,12 +107,12 @@ impl<T: ?Sized, P: Predicate<T> + ?Sized> fmt::Display for Expected<T, P> {
 }
 
 /// Represents expectation codes of predicates.
-pub struct ExpectedCode<T: ?Sized, P: Predicate<T> + ?Sized> {
+pub struct ExpectedCode<T: ?Sized, P: ?Sized> {
     value: PhantomData<T>,
     predicate: PhantomData<P>,
 }
 
-impl<T: ?Sized, P: Predicate<T> + ?Sized> ExpectedCode<T, P> {
+impl<T: ?Sized, P: ?Sized> ExpectedCode<T, P> {
     const fn new() -> Self {
         Self {
             value: PhantomData,
@@ -413,6 +413,16 @@ impl<T, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> Refinement<T, P, H> {
         Self::refine(function(self.take()))
     }
 
+    /// Maps thte value of the refinement without checking the new value.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that the new value satisfies the predicate.
+    pub unsafe fn map_unchecked<F: FnOnce(T) -> T>(self, function: F) -> Self {
+        // SAFETY: the caller must ensure that the new value satisfies the predicate
+        unsafe { Self::unchecked(function(self.take())) }
+    }
+
     /// Replaces the value of the refinement.
     ///
     /// # Errors
@@ -420,6 +430,16 @@ impl<T, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> Refinement<T, P, H> {
     /// Returns [`struct@Error`] if the new value does not satisfy the predicate.
     pub fn replace(self, value: T) -> Result<Self, Error<T, P, H>> {
         Self::refine(value)
+    }
+
+    /// Replaces the value of the refinement without checking the new value.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that the new value satisfies the predicate.
+    pub unsafe fn replace_unchecked(self, value: T) -> Self {
+        // SAFETY: the caller must ensure that the new value satisfies the predicate
+        unsafe { Self::unchecked(value) }
     }
 
     #[cfg(feature = "unsafe-assert")]
@@ -436,7 +456,7 @@ impl<T, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> Refinement<T, P, H> {
     }
 
     /// Returns a reference to the value of the refinement.
-    #[allow(clippy::missing_const_for_fn)]
+    #[allow(clippy::missing_const_for_fn)] // conditionally const
     pub fn get(&self) -> &T {
         #[cfg(feature = "unsafe-assert")]
         self.assert_refined();

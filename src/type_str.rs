@@ -10,7 +10,7 @@ pub trait TypeStr {
 
 #[doc(hidden)]
 pub mod import {
-    pub use core::fmt;
+    pub use core::{fmt, marker::PhantomData};
 }
 
 /// Lifts static strings to type-level strings.
@@ -26,21 +26,16 @@ pub mod import {
 /// Is equivalent to:
 ///
 /// ```
-/// use core::fmt;
+/// use core::{fmt, marker::PhantomData};
 ///
 /// use refinement_types::{StaticStr, TypeStr};
 ///
-/// #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-/// struct HelloWorld;
+/// struct HelloWorld {
+///     private: PhantomData<()>,
+/// }
 ///
 /// impl TypeStr for HelloWorld {
 ///     const VALUE: StaticStr = "Hello, world!";
-/// }
-///
-/// impl fmt::Display for HelloWorld {
-///     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-///         formatter.write_str(Self::VALUE)
-///     }
 /// }
 /// ```
 #[macro_export]
@@ -49,21 +44,12 @@ macro_rules! type_str {
         $(
             #[doc = $doc]
         )?
-        #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-        $vis struct $name;
+        $vis struct $name {
+            private: $crate::type_str::import::PhantomData<()>,
+        }
 
         impl $crate::type_str::TypeStr for $name {
             const VALUE: $crate::static_str::StaticStr = $value;
-        }
-
-        impl $crate::type_str::import::fmt::Display for $name {
-            fn fmt(
-                &self, formatter: &mut $crate::type_str::import::fmt::Formatter<'_>
-            ) -> $crate::type_str::import::fmt::Result {
-                use $crate::type_str::TypeStr;
-
-                formatter.write_str(Self::VALUE)
-            }
         }
     };
 }

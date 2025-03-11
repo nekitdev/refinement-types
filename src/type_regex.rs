@@ -6,7 +6,7 @@ use crate::static_str::StaticStr;
 
 #[doc(hidden)]
 pub mod import {
-    pub use std::{fmt, sync::LazyLock};
+    pub use std::{fmt, marker::PhantomData, sync::LazyLock};
 }
 
 /// Represents static regular expressions (as returned in [`get`] of [`TypeRegex`]).
@@ -34,12 +34,13 @@ pub const INVALID: StaticStr = "invalid regex";
 /// Is equivalent to:
 ///
 /// ```
-/// use std::{fmt, sync::LazyLock};
+/// use std::{fmt, marker::PhantomData, sync::LazyLock};
 ///
 /// use refinement_types::{Regex, StaticRegex, TypeRegex};
 ///
-/// #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-/// struct Integer;
+/// struct Integer {
+///     private: PhantomData<()>,
+/// }
 ///
 /// impl TypeRegex for Integer {
 ///     fn get() -> StaticRegex {
@@ -50,12 +51,6 @@ pub const INVALID: StaticStr = "invalid regex";
 ///         LazyLock::force(&REGEX)
 ///     }
 /// }
-///
-/// impl fmt::Display for Integer {
-///     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-///         Self::get().fmt(formatter)
-///     }
-/// }
 /// ```
 #[macro_export]
 macro_rules! type_regex {
@@ -63,8 +58,9 @@ macro_rules! type_regex {
         $(
             #[doc = $doc]
         )?
-        #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-        $vis struct $name;
+        $vis struct $name {
+            private: $crate::type_regex::import::PhantomData<()>,
+        }
 
         impl $crate::type_regex::TypeRegex for $name {
             fn get() -> $crate::type_regex::StaticRegex {

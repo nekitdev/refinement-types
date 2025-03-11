@@ -38,7 +38,6 @@ impl StartsWithError {
 }
 
 /// Checks if the string starts with the specified prefix `S`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct StartsWith<S: TypeStr + ?Sized> {
     prefix: PhantomData<S>,
 }
@@ -102,7 +101,6 @@ impl EndsWithError {
 }
 
 /// Checks if the string ends with the specified suffix `S`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct EndsWith<S: TypeStr + ?Sized> {
     suffix: PhantomData<S>,
 }
@@ -163,7 +161,6 @@ impl ContainsError {
 }
 
 /// Checks if the string contains the specified string `S`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Contains<S: TypeStr + ?Sized> {
     string: PhantomData<S>,
 }
@@ -227,8 +224,9 @@ impl StartsWithCharError {
 }
 
 /// Checks if the string starts with the specified character `C`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct StartsWithChar<const C: char>;
+pub struct StartsWithChar<const C: char> {
+    private: PhantomData<()>,
+}
 
 impl<T: AsRef<str> + ?Sized, const C: char> Predicate<T> for StartsWithChar<C> {
     type Error = StartsWithCharError;
@@ -276,8 +274,9 @@ impl EndsWithCharError {
 }
 
 /// Checks if the string ends with the specified character `C`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct EndsWithChar<const C: char>;
+pub struct EndsWithChar<const C: char> {
+    private: PhantomData<()>,
+}
 
 impl<T: AsRef<str> + ?Sized, const C: char> Predicate<T> for EndsWithChar<C> {
     type Error = EndsWithCharError;
@@ -325,8 +324,9 @@ impl ContainsCharError {
 }
 
 /// Checks if the string contains the specified character `C`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct ContainsChar<const C: char>;
+pub struct ContainsChar<const C: char> {
+    private: PhantomData<()>,
+}
 
 impl<T: AsRef<str> + ?Sized, const C: char> Predicate<T> for ContainsChar<C> {
     type Error = ContainsCharError;
@@ -369,8 +369,9 @@ impl TrimmedStartError {
 }
 
 /// Checks if the string is trimmed at the start.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct TrimmedStart;
+pub struct TrimmedStart {
+    private: PhantomData<()>,
+}
 
 impl<T: AsRef<str> + ?Sized> Predicate<T> for TrimmedStart {
     type Error = TrimmedStartError;
@@ -415,8 +416,9 @@ impl TrimmedEndError {
 }
 
 /// Checks if the string is trimmed at the end.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct TrimmedEnd;
+pub struct TrimmedEnd {
+    private: PhantomData<()>,
+}
 
 impl<T: AsRef<str> + ?Sized> Predicate<T> for TrimmedEnd {
     type Error = TrimmedEndError;
@@ -458,8 +460,9 @@ impl TrimmedError {
 }
 
 /// Checks if the string is trimmed.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct Trimmed;
+pub struct Trimmed {
+    private: PhantomData<()>,
+}
 
 impl<T: AsRef<str> + ?Sized> Predicate<T> for Trimmed {
     type Error = TrimmedError;
@@ -501,8 +504,9 @@ impl AsciiError {
 }
 
 /// Checks if the string is valid ASCII.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct Ascii;
+pub struct Ascii {
+    private: PhantomData<()>,
+}
 
 impl<T: AsRef<str> + ?Sized> Predicate<T> for Ascii {
     type Error = AsciiError;
@@ -553,7 +557,6 @@ impl MismatchError {
 
 /// Checks if the string matches the specified pattern `S`.
 #[cfg(feature = "regex")]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Matches<S: TypeRegex + ?Sized> {
     pattern: PhantomData<S>,
 }

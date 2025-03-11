@@ -1,6 +1,7 @@
 //! Predicates based on emptiness.
 
 use core::fmt;
+use core::marker::PhantomData;
 
 use thiserror::Error;
 
@@ -31,8 +32,9 @@ pub const VALUE: StaticStr = "empty value";
 pub const EMPTY: StaticStr = "empty";
 
 /// Checks whether the value is empty.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct Empty;
+pub struct Empty {
+    private: PhantomData<()>,
+}
 
 impl<T: HasEmpty + ?Sized> Predicate<T> for Empty {
     type Error = EmptyError;

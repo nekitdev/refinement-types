@@ -1,6 +1,6 @@
 //! Predicates based on length.
 
-use core::fmt;
+use core::{fmt, marker::PhantomData};
 
 #[cfg(feature = "diagnostics")]
 use miette::Diagnostic;
@@ -40,8 +40,9 @@ impl LessError {
 }
 
 /// Checks whether the given value has length less than `N`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct Less<const N: usize>;
+pub struct Less<const N: usize> {
+    private: PhantomData<()>,
+}
 
 impl<const N: usize, T: HasLength + ?Sized> Predicate<T> for Less<N> {
     type Error = LessError;
@@ -88,8 +89,9 @@ impl LessOrEqualError {
 }
 
 /// Checks whether the given value has length less than or equal to `N`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct LessOrEqual<const N: usize>;
+pub struct LessOrEqual<const N: usize> {
+    private: PhantomData<()>,
+}
 
 impl<const N: usize, T: HasLength + ?Sized> Predicate<T> for LessOrEqual<N> {
     type Error = LessOrEqualError;
@@ -133,8 +135,9 @@ impl GreaterError {
 }
 
 /// Checks whether the given value has length greater than `N`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct Greater<const N: usize>;
+pub struct Greater<const N: usize> {
+    private: PhantomData<()>,
+}
 
 impl<const N: usize, T: HasLength + ?Sized> Predicate<T> for Greater<N> {
     type Error = GreaterError;
@@ -181,8 +184,9 @@ impl GreaterOrEqualError {
 }
 
 /// Checks whether the given value has length greater than or equal to `N`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct GreaterOrEqual<const N: usize>;
+pub struct GreaterOrEqual<const N: usize> {
+    private: PhantomData<()>,
+}
 
 impl<const N: usize, T: HasLength + ?Sized> Predicate<T> for GreaterOrEqual<N> {
     type Error = GreaterOrEqualError;
@@ -226,8 +230,9 @@ impl EqualError {
 }
 
 /// Checks whether the given value has length equal to `N`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct Equal<const N: usize>;
+pub struct Equal<const N: usize> {
+    private: PhantomData<()>,
+}
 
 impl<const N: usize, T: HasLength + ?Sized> Predicate<T> for Equal<N> {
     type Error = EqualError;
@@ -271,8 +276,9 @@ impl NotEqualError {
 }
 
 /// Checks whether the given value has length not equal to `N`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct NotEqual<const N: usize>;
+pub struct NotEqual<const N: usize> {
+    private: PhantomData<()>,
+}
 
 impl<const N: usize, T: HasLength + ?Sized> Predicate<T> for NotEqual<N> {
     type Error = NotEqualError;
@@ -335,8 +341,9 @@ impl ModuloError {
 }
 
 /// Checks whether the given value length divided by `D` has modulo `M`.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct Modulo<const D: usize, const M: usize>;
+pub struct Modulo<const D: usize, const M: usize> {
+    private: PhantomData<()>,
+}
 
 impl<const D: usize, const M: usize, T: HasLength + ?Sized> Predicate<T> for Modulo<D, M> {
     type Error = ModuloError;

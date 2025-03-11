@@ -48,7 +48,7 @@ use refinement_types::{Refinement, int::u8, length, logic::And, str};
 pub type Name<'n> = Refinement<&'n str, And<str::Ascii, length::Closed<1, 32>>>;
 
 /// Represents device charge, in percentage.
-pub type Charge = Refinement<u8, u8::Closed<1, 100>>;
+pub type Charge = Refinement<u8, u8::LessOrEqual<100>>;
 
 /// Represents devices.
 #[derive(Debug)]
@@ -83,8 +83,8 @@ impl<'d> Device<'d> {
 ```rust
 // main.rs
 
-use anyhow::Result;
 use device::{Charge, Device, Name};
+use miette::Result;
 
 fn main() -> Result<()> {
     let charge = Charge::refine(13)?;

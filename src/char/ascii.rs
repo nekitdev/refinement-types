@@ -1,6 +1,6 @@
 //! ASCII character predicates.
 
-use core::fmt;
+use core::{fmt, marker::PhantomData};
 
 #[cfg(feature = "diagnostics")]
 use miette::Diagnostic;
@@ -39,8 +39,9 @@ impl DigitError {
 }
 
 /// Checks whether the given character is a digit in the specified base `B`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct Digit<const B: Base = 10>;
+pub struct Digit<const B: Base = 10> {
+    private: PhantomData<()>,
+}
 
 /// Checks whether the given character is an octal digit.
 pub type OctDigit = Digit<8>;

@@ -13,8 +13,9 @@ use crate::{
 };
 
 /// Represents predicates that are always satisfied.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct True;
+pub struct True {
+    private: PhantomData<()>,
+}
 
 /// Represents errors that are never encountered.
 ///
@@ -51,8 +52,9 @@ impl<T: ?Sized> Predicate<T> for True {
 }
 
 /// Represents predicates that are never satisfied.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct False;
+pub struct False {
+    private: PhantomData<()>,
+}
 
 /// Represents errors that are always encountered.
 #[derive(Debug, Error)]
@@ -132,7 +134,6 @@ impl<E: Diagnostic + 'static, F: Diagnostic + 'static> Diagnostic for EitherErro
 }
 
 /// Represents predicates that are satisfied when both `P` and `Q` are satisfied.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct And<P: ?Sized, Q: ?Sized> {
     left: PhantomData<P>,
     right: PhantomData<Q>,
@@ -143,8 +144,8 @@ impl<T: ?Sized, P: Predicate<T> + ?Sized, Q: Predicate<T> + ?Sized> Predicate<T>
 
     fn check(value: &T) -> Result<(), Self::Error> {
         P::check(value)
-            .map_err(EitherError::Left)
-            .and_then(|()| Q::check(value).map_err(EitherError::Right))
+            .map_err(Self::Error::Left)
+            .and_then(|()| Q::check(value).map_err(Self::Error::Right))
     }
 
     fn expect(formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -202,7 +203,6 @@ impl<E: Diagnostic, F: Diagnostic> Diagnostic for BothError<E, F> {
 }
 
 /// Represents predicates that are satisfied when either `P` or `Q` (or both) are satisfied.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Or<P: ?Sized, Q: ?Sized> {
     left: PhantomData<P>,
     right: PhantomData<Q>,
@@ -248,7 +248,6 @@ impl NotError {
 }
 
 /// Represents predicates that are satisfied when `P` is not satisfied.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Not<P: ?Sized> {
     predicate: PhantomData<P>,
 }
@@ -318,7 +317,6 @@ impl<E: Diagnostic + 'static, F: Diagnostic + 'static> Diagnostic for NeitherOrB
 }
 
 /// Represents predicates that are satisfied when either `P` or `Q` (but *not* both) are satisfied.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Xor<P: ?Sized, Q: ?Sized> {
     left: PhantomData<P>,
     right: PhantomData<Q>,

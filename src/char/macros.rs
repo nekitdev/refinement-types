@@ -1,5 +1,5 @@
 pub(crate) mod import {
-    pub use core::fmt;
+    pub use core::{fmt, marker::PhantomData};
 
     pub use paste::paste;
     pub use thiserror::Error;
@@ -37,9 +37,10 @@ macro_rules! predicate {
                 }
             }
 
-            #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
             #[doc = $doc]
-            pub struct $name;
+            pub struct $name {
+                private: $crate::char::macros::import::PhantomData<()>,
+            }
 
             impl $crate::core::Predicate<char> for $name {
                 type Error = [< $name Error >];

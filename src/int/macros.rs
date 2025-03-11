@@ -1,5 +1,5 @@
 pub(crate) mod import {
-    pub use core::fmt;
+    pub use core::{fmt, marker::PhantomData};
 
     pub use paste::paste;
     pub use thiserror::Error;
@@ -129,8 +129,9 @@ macro_rules! compare {
                 $crate::int::macros::human!($operation),
                 " `N`."
             )]
-            #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-            pub struct $name<const N: $int>;
+            pub struct $name<const N: $int> {
+                private: $crate::int::macros::import::PhantomData<()>,
+            }
 
             impl<const N: $int> $crate::core::Predicate<$int> for $name<N> {
                 type Error = [< $name Error >];
@@ -313,7 +314,7 @@ macro_rules! modulo {
             feature = "diagnostics",
             derive($crate::int::macros::import::Diagnostic),
             diagnostic(
-                code(int::$int::Modulo),
+                code(int::$int::modulo),
                 help("make sure the value divided by {divisor} and has modulo {modulo}")
             )
         )]
@@ -334,8 +335,9 @@ macro_rules! modulo {
         #[doc = concat!(
             "Checks whether ", $crate::int::macros::reference!($int), " divided by `D` has modulo `M`."
         )]
-        #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-        pub struct Modulo<const D: $int, const M: $int>;
+        pub struct Modulo<const D: $int, const M: $int> {
+            private: $crate::int::macros::import::PhantomData<()>,
+        }
 
         impl<const D: $int, const M: $int> $crate::core::Predicate<$int> for Modulo<D, M> {
             type Error = ModuloError;
