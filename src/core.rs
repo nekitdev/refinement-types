@@ -21,19 +21,7 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer, de};
 
 use crate::{static_str::StaticStr, type_str, type_str::TypeStr};
 
-type_str!(
-    pub DefaultHelp = "see the report for more information"
-    => "Represents the default help message."
-);
-
-/// Literal space string.
-pub const SPACE: StaticStr = " ";
-
-/// Literal `(` string.
-pub const OPEN: StaticStr = "(";
-
-/// Literal `)` string.
-pub const CLOSE: StaticStr = ")";
+type_str!(pub NoContext = "no context" => "Represents the abscence of context.");
 
 /// Literal `expected` string.
 pub const EXPECTED: StaticStr = "expected";
@@ -131,74 +119,74 @@ impl<T: ?Sized, P: Predicate<T> + ?Sized> fmt::Display for ExpectedCode<T, P> {
 ///
 /// Values of this type are guaranteed to contain values of type `T`
 /// that satisfy the predicate `P`.
-pub struct Refinement<T, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized = DefaultHelp> {
+pub struct Refinement<T, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized = NoContext> {
     value: T,
     predicate: PhantomData<P>,
-    help: PhantomData<H>,
+    context: PhantomData<C>,
 }
 
-impl<T: fmt::Debug, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> fmt::Debug
-    for Refinement<T, P, H>
+impl<T: fmt::Debug, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> fmt::Debug
+    for Refinement<T, P, C>
 {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.get().fmt(formatter)
     }
 }
 
-impl<T: fmt::Display, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> fmt::Display
-    for Refinement<T, P, H>
+impl<T: fmt::Display, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> fmt::Display
+    for Refinement<T, P, C>
 {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.get().fmt(formatter)
     }
 }
 
-impl<T: Clone, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> Clone for Refinement<T, P, H> {
+impl<T: Clone, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> Clone for Refinement<T, P, C> {
     fn clone(&self) -> Self {
         // SAFETY: by construction, the value satisfies the predicate
         unsafe { Self::unchecked(self.get().clone()) }
     }
 }
 
-impl<T: Copy, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> Copy for Refinement<T, P, H> {}
+impl<T: Copy, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> Copy for Refinement<T, P, C> {}
 
-impl<T: PartialEq, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> PartialEq
-    for Refinement<T, P, H>
+impl<T: PartialEq, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> PartialEq
+    for Refinement<T, P, C>
 {
     fn eq(&self, other: &Self) -> bool {
         self.get().eq(other.get())
     }
 }
 
-impl<T: Eq, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> Eq for Refinement<T, P, H> {}
+impl<T: Eq, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> Eq for Refinement<T, P, C> {}
 
-impl<T: PartialOrd, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> PartialOrd
-    for Refinement<T, P, H>
+impl<T: PartialOrd, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> PartialOrd
+    for Refinement<T, P, C>
 {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.get().partial_cmp(other.get())
     }
 }
 
-impl<T: Ord, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> Ord for Refinement<T, P, H> {
+impl<T: Ord, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> Ord for Refinement<T, P, C> {
     fn cmp(&self, other: &Self) -> Ordering {
         self.get().cmp(other.get())
     }
 }
 
-impl<T: Hash, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> Hash for Refinement<T, P, H> {
-    fn hash<G: Hasher>(&self, hasher: &mut G) {
+impl<T: Hash, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> Hash for Refinement<T, P, C> {
+    fn hash<H: Hasher>(&self, hasher: &mut H) {
         self.get().hash(hasher);
     }
 }
 
-impl<T, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> AsRef<T> for Refinement<T, P, H> {
+impl<T, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> AsRef<T> for Refinement<T, P, C> {
     fn as_ref(&self) -> &T {
         self.get()
     }
 }
 
-impl<T, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> Deref for Refinement<T, P, H> {
+impl<T, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> Deref for Refinement<T, P, C> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
@@ -206,13 +194,13 @@ impl<T, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> Deref for Refinement<T, P
     }
 }
 
-impl<T: Default, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> Refinement<T, P, H> {
+impl<T: Default, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> Refinement<T, P, C> {
     /// Refines the default value of type `T`.
     ///
     /// # Errors
     ///
     /// Returns [`struct@Error`] if the default value does not satisfy the predicate.
-    pub fn try_default() -> Result<Self, Error<T, P, H>> {
+    pub fn try_default() -> Result<Self, Error<T, P, C>> {
         Self::refine(T::default())
     }
 
@@ -228,8 +216,8 @@ impl<T: Default, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> Refinement<T, P,
 }
 
 #[cfg(feature = "serde")]
-impl<T: Serialize, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> Serialize
-    for Refinement<T, P, H>
+impl<T: Serialize, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> Serialize
+    for Refinement<T, P, C>
 {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         self.get().serialize(serializer)
@@ -237,8 +225,8 @@ impl<T: Serialize, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> Serialize
 }
 
 #[cfg(feature = "serde")]
-impl<'de, T: Deserialize<'de>, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> Deserialize<'de>
-    for Refinement<T, P, H>
+impl<'de, T: Deserialize<'de>, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> Deserialize<'de>
+    for Refinement<T, P, C>
 {
     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         let value = T::deserialize(deserializer)?;
@@ -247,7 +235,7 @@ impl<'de, T: Deserialize<'de>, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> De
     }
 }
 
-impl<T, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> Refinement<T, P, H> {
+impl<T, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> Refinement<T, P, C> {
     /// Constructs [`Self`] without checking the value.
     ///
     /// # Safety
@@ -259,7 +247,7 @@ impl<T, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> Refinement<T, P, H> {
         Self {
             value,
             predicate: PhantomData,
-            help: PhantomData,
+            context: PhantomData,
         }
     }
 }
@@ -268,35 +256,36 @@ impl<T, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> Refinement<T, P, H> {
 ///
 /// This error is constructed from the value that failed to satisfy the predicate
 /// and the error produced by the predicate.
-pub struct Error<T, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized = DefaultHelp> {
+pub struct Error<T, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized = NoContext> {
     /// The value that failed to satisfy the predicate.
     pub value: T,
 
     /// The error produced by the predicate.
     pub error: P::Error,
 
-    /// The help message of the refinement.
-    pub help: PhantomData<H>,
+    /// The context of the refinement.
+    pub context: PhantomData<C>,
 }
 
-impl<T, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> fmt::Display for Error<T, P, H> {
+impl<T, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> fmt::Display for Error<T, P, C> {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             formatter,
-            "{EXPECTED} {expected} (code `{code}`)",
+            "{EXPECTED} {expected} (code `{code}`) [{context}]",
             expected = P::expected(),
-            code = P::expected_code()
+            code = P::expected_code(),
+            context = Self::context(),
         )
     }
 }
 
-impl<T, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> fmt::Debug for Error<T, P, H> {
+impl<T, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> fmt::Debug for Error<T, P, C> {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Display::fmt(self, formatter)
     }
 }
 
-impl<T, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> ErrorCore for Error<T, P, H>
+impl<T, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> ErrorCore for Error<T, P, C>
 where
     P::Error: ErrorCore + 'static,
 {
@@ -306,7 +295,7 @@ where
 }
 
 #[cfg(feature = "diagnostics")]
-impl<T, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> Diagnostic for Error<T, P, H>
+impl<T, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> Diagnostic for Error<T, P, C>
 where
     P::Error: Diagnostic + 'static,
 {
@@ -315,7 +304,7 @@ where
     }
 
     fn help(&self) -> Option<Box<dyn fmt::Display + '_>> {
-        Some(Box::new(Self::help()))
+        Some(Box::new(Self::context()))
     }
 
     fn diagnostic_source(&self) -> Option<&dyn Diagnostic> {
@@ -323,13 +312,13 @@ where
     }
 }
 
-impl<T, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> Error<T, P, H> {
+impl<T, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> Error<T, P, C> {
     /// Constructs [`Self`].
     pub const fn new(value: T, error: P::Error) -> Self {
         Self {
             value,
             error,
-            help: PhantomData,
+            context: PhantomData,
         }
     }
 
@@ -343,38 +332,38 @@ impl<T, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> Error<T, P, H> {
         &self.error
     }
 
-    /// Returns the help message of the refinement.
-    pub const fn help() -> StaticStr {
-        H::VALUE
+    /// Returns the context of the refinement.
+    pub const fn context() -> StaticStr {
+        C::VALUE
     }
 }
 
-impl<T, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> Error<T, P, H> {
+impl<T, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> Error<T, P, C> {
     /// Returns the contained value and the received error.
     pub fn into_parts(self) -> (T, P::Error) {
         (self.value, self.error)
     }
 }
 
-impl<T, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> From<(T, P::Error)> for Error<T, P, H> {
+impl<T, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> From<(T, P::Error)> for Error<T, P, C> {
     fn from((value, error): (T, P::Error)) -> Self {
         Self::new(value, error)
     }
 }
 
-impl<T, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> From<Error<T, P, H>> for (T, P::Error) {
-    fn from(error: Error<T, P, H>) -> Self {
+impl<T, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> From<Error<T, P, C>> for (T, P::Error) {
+    fn from(error: Error<T, P, C>) -> Self {
         error.into_parts()
     }
 }
 
-impl<T, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> Refinement<T, P, H> {
+impl<T, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> Refinement<T, P, C> {
     /// Refines the given value.
     ///
     /// # Errors
     ///
     /// Returns [`struct@Error`] if the value does not satisfy the predicate.
-    pub fn refine(value: T) -> Result<Self, Error<T, P, H>> {
+    pub fn refine(value: T) -> Result<Self, Error<T, P, C>> {
         match Self::check(&value) {
             // SAFETY: the value satisfies the predicate if the check is successful
             Ok(()) => Ok(unsafe { Self::unchecked(value) }),
@@ -409,7 +398,7 @@ impl<T, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> Refinement<T, P, H> {
     /// # Errors
     ///
     /// Returns [`struct@Error`] if the resulting value does not satisfy the predicate.
-    pub fn map<F: FnOnce(T) -> T>(self, function: F) -> Result<Self, Error<T, P, H>> {
+    pub fn map<F: FnOnce(T) -> T>(self, function: F) -> Result<Self, Error<T, P, C>> {
         Self::refine(function(self.take()))
     }
 
@@ -428,7 +417,7 @@ impl<T, P: Predicate<T> + ?Sized, H: TypeStr + ?Sized> Refinement<T, P, H> {
     /// # Errors
     ///
     /// Returns [`struct@Error`] if the new value does not satisfy the predicate.
-    pub fn replace(self, value: T) -> Result<Self, Error<T, P, H>> {
+    pub fn replace(self, value: T) -> Result<Self, Error<T, P, C>> {
         Self::refine(value)
     }
 
