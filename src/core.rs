@@ -402,7 +402,7 @@ impl<T, P: Predicate<T> + ?Sized, C: TypeStr + ?Sized> Refinement<T, P, C> {
         Self::refine(function(self.take()))
     }
 
-    /// Maps thte value of the refinement without checking the new value.
+    /// Maps the value of the refinement without checking the new value.
     ///
     /// # Safety
     ///
